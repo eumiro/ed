@@ -8,3 +8,6 @@ class Buffer:
             self.lines = []
         else:
             self.lines = [str(line) for line in lines]
+
+    def __len__(self):
+        return len(('\n'.join(self.lines)).encode('utf8'))
