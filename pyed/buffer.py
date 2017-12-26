@@ -50,3 +50,5 @@ class Buffer:
                 return self.lines[rng]
             else:
                 return []
+        else:
+            raise NotImplementedError(f'invalid command {cmd}')

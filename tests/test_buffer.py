@@ -21,6 +21,14 @@ def test_init_ok_len(lines, size):
     assert len(Buffer(lines)) == size
 
 
+@pytest.mark.parametrize('cmd',
+                         ['b'])
+def test_invalid_cmd(cmd):
+    buffer = Buffer()
+    with pytest.raises(NotImplementedError):
+        buffer.run(cmd)
+
+
 @pytest.fixture(scope='function')
 def buffer_five():
     return Buffer(['one', 'two', 'three', 'four', 'five'])
@@ -36,6 +44,7 @@ def test_empty_cmd_p():
                           ('1p', ['one']),
                           (',2p', ['one', 'two']),
                           ('4,p', ['four', 'five']),
-                          ('1,3p', ['one', 'two', 'three'])])
+                          ('1,3p', ['one', 'two', 'three']),
+                          (',p', ['one', 'two', 'three', 'four', 'five'])])
 def test_five_cmd(cmd, res, buffer_five):
     assert buffer_five.run(cmd) == res
