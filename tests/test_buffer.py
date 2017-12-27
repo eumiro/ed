@@ -48,3 +48,17 @@ def test_empty_cmd_p():
                           (',p', ['one', 'two', 'three', 'four', 'five'])])
 def test_five_cmd(cmd, res, buffer_five):
     assert buffer_five.run(cmd) == res
+
+
+@pytest.mark.parametrize('cmd, res',
+                         [
+                          ('1', ((0, 1), None)),
+                          ('+1', ((None, 1), None)),
+                          ('-1', ((None, -1), None)),
+                          ('$', ((0, -1), None)),
+                          ('1,2', ((0, 1), (0, 2))),
+                          ('1,', ((0, 1), (0, -1))),
+                          ])
+def test_parse_cmd(cmd, res):
+    assert Buffer.parse_cmd(cmd) == res
+
