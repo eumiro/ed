@@ -58,16 +58,30 @@ class Buffer:
 
     @staticmethod
     def match_address(cmd, default):
-        if cmd.startswith(tuple('0123456789')):
+        first, second = None, None
+        if cmd.startswith('/'):
+            match = re.match(r'^/((\\\/|[^/])*)/(.*)$', cmd)
+            first = re.compile(match.group(1).replace('\/', '/'))
+            second = 0
+            cmd = match.group(3)
+            if cmd.startswith(tuple('-+0123456789')):
+                match = re.match(r'^([-+]\d+)(.*)$', cmd)
+                second = int(match.group(1))
+                cmd = match.group(2)
+        elif cmd.startswith(tuple('0123456789')):
             match = re.match(r'^(\d+)(.*)$', cmd)
-            return (0, int(match.group(1))), match.group(2)
+            first, second = 0, int(match.group(1))
+            cmd = match.group(2)
         elif cmd.startswith(('-', '+')):
             match = re.match(r'^([-+]\d+)(.*)$', cmd)
-            return (None, int(match.group(1))), match.group(2)
+            first, second = None, int(match.group(1))
+            cmd = match.group(2)
         elif cmd.startswith('$'):
-            return (0, -1), cmd[1:]
+            first, second = 0, -1
+            cmd = cmd[1:]
         else:
-            return default, cmd
+            first, second = default
+        return (first, second), cmd
 
     @staticmethod
     def parse_cmd(cmd):

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import re
+
 import pytest
 
 from pyed.buffer import Buffer
@@ -50,15 +52,17 @@ def test_five_cmd(cmd, res, buffer_five):
     assert buffer_five.run(cmd) == res
 
 
-@pytest.mark.parametrize('cmd, res',
-                         [
-                          ('1', ((0, 1), None)),
-                          ('+1', ((None, 1), None)),
-                          ('-1', ((None, -1), None)),
-                          ('$', ((0, -1), None)),
-                          ('1,2', ((0, 1), (0, 2))),
-                          ('1,', ((0, 1), (0, -1))),
-                          ])
+@pytest.mark.parametrize('cmd, res', [
+    ('1', ((0, 1), None)),
+    ('+1', ((None, 1), None)),
+    ('-1', ((None, -1), None)),
+    ('$', ((0, -1), None)),
+    ('1,2', ((0, 1), (0, 2))),
+    ('1,', ((0, 1), (0, -1))),
+    ('/foo/', ((re.compile(r'foo'), 0), None)),
+    ('/foo\/bar/', ((re.compile(r'foo/bar'), 0), None)),
+    ('/foo\/bar/-3,/baz/+2', ((re.compile(r'foo/bar'), -3), (re.compile(r'baz'), 2))),
+    ])
 def test_parse_cmd(cmd, res):
     assert Buffer.parse_cmd(cmd) == res
 
