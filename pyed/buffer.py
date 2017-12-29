@@ -65,9 +65,16 @@ class Buffer:
             second = 0
             cmd = match.group(3)
             if cmd.startswith(tuple('-+0123456789')):
-                match = re.match(r'^([-+]\d+)(.*)$', cmd)
-                second = int(match.group(1))
-                cmd = match.group(2)
+                if len(cmd) > 1 and cmd[1].isdigit():
+                    match = re.match(r'^([-+]\d+)(.*)$', cmd)
+                    second = int(match.group(1))
+                    cmd = match.group(2)
+                else:
+                    match = re.match(r'^([-+]+)(.*)$', cmd)
+                    second = len(match.group(1))
+                    if cmd.startswith('-'):
+                        second = -second
+                    cmd = match.group(2)
         elif cmd.startswith(tuple('0123456789')):
             match = re.match(r'^(\d+)(.*)$', cmd)
             first, second = 0, int(match.group(1))

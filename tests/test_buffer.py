@@ -62,6 +62,10 @@ def test_five_cmd(cmd, res, buffer_five):
     ('/foo/', ((re.compile(r'foo'), 0), None)),
     ('/foo\/bar/', ((re.compile(r'foo/bar'), 0), None)),
     ('/foo\/bar/-3,/baz/+2', ((re.compile(r'foo/bar'), -3), (re.compile(r'baz'), 2))),
+    ('/foo/+', ((re.compile(r'foo'), 1), None)),
+    ('/foo/+1', ((re.compile(r'foo'), 1), None)),
+    ('/foo/++', ((re.compile(r'foo'), 2), None)),
+    ('/foo/---', ((re.compile(r'foo'), -3), None)),
     ])
 def test_parse_cmd(cmd, res):
     assert Buffer.parse_cmd(cmd) == res
