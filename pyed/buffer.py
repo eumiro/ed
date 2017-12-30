@@ -12,6 +12,53 @@ class Buffer:
         else:
             self.lines = [str(line) for line in lines]
         self.cur = len(self.lines)
+        self.re_cmd = self._init_re_cmd()
+
+    def _init_re_cmd(self):
+        addr = r"""
+                \.|
+                \$|
+                [-+]?\d+|
+                \++|
+                \-+|
+                /((\\\/|[^/])*)/|
+                \?((\\\?|[^?])*)\?|
+                '[a-z]|
+                """
+        suff = r'[-+]*\d*'
+        sep = r',|;|'
+        re_cmd = re.compile(rf"""^
+            ((?P<_0>{addr})(?P<_1>{suff})
+             |
+             (?P<a_0>{addr})(?P<a_1>{suff})
+             (?P<a>a|i|k[a-z]|s[gpr]*|x|=)
+             |
+             (?P<c_0>{addr})(?P<c_1>{suff})
+             (?P<c_2>{sep})
+             (?P<c_3>{addr})(?P<c_4>{suff})
+             (?P<c>c|d|j|l|n|p|y)
+             |
+             (?P<e>[eEf])\s+(?P<e_0>[\w\.]+)
+             |
+             (?P<h>h|H|P|q|Q|u)
+             |
+             (?P<m_0>{addr})(?P<m_1>{suff})
+             (?P<m_2>{sep})
+             (?P<m_3>{addr})(?P<m_4>{suff})
+             (?P<m>m|t)
+             (?P<m_5>{addr})(?P<m_6>{suff})
+             |
+             (?P<r_0>{addr})(?P<r_1>{suff})
+             (?P<r>r|w|wq|W)\s+(?P<r_2>!?[\w\.]+)
+             |
+             (?P<s_0>{addr})(?P<s_1>{suff})
+             (?P<s_2>{sep})
+             (?P<s_3>{addr})(?P<s_4>{suff})
+             (?P<s>s)
+             /(?P<s_5>(\\\/|[^/])*)/(?P<s_6>(\\\/|[^/])*)/
+             (?P<s_7>[g\dlnp]*)
+            )$""", re.X)
+        return re_cmd
 
     def __len__(self):
         return len(('\n'.join(self.lines)).encode('utf8'))
@@ -90,11 +137,6 @@ class Buffer:
             first, second = default
         return (first, second), cmd
 
-    @staticmethod
-    def parse_cmd(cmd):
-        start, rest = Buffer.match_address(cmd, default=(0, 0))
-        if rest.startswith(','):
-            end, rest = Buffer.match_address(rest[1:], default=(0, -1))
-        else:
-            end = None
-        return (start, end)
+    def parse_cmd(self, cmd):
+        match = self.re_cmd.match(cmd)
+        return bool(match)

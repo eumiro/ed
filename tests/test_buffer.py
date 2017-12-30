@@ -52,21 +52,44 @@ def test_five_cmd(cmd, res, buffer_five):
     assert buffer_five.run(cmd) == res
 
 
-@pytest.mark.parametrize('cmd, res', [
-    ('1', ((0, 1), None)),
-    ('+1', ((None, 1), None)),
-    ('-1', ((None, -1), None)),
-    ('$', ((0, -1), None)),
-    ('1,2', ((0, 1), (0, 2))),
-    ('1,', ((0, 1), (0, -1))),
-    ('/foo/', ((re.compile(r'foo'), 0), None)),
-    ('/foo\/bar/', ((re.compile(r'foo/bar'), 0), None)),
-    ('/foo\/bar/-3,/baz/+2', ((re.compile(r'foo/bar'), -3), (re.compile(r'baz'), 2))),
-    ('/foo/+', ((re.compile(r'foo'), 1), None)),
-    ('/foo/+1', ((re.compile(r'foo'), 1), None)),
-    ('/foo/++', ((re.compile(r'foo'), 2), None)),
-    ('/foo/---', ((re.compile(r'foo'), -3), None)),
-    ])
-def test_parse_cmd(cmd, res):
-    assert Buffer.parse_cmd(cmd) == res
+@pytest.mark.parametrize('cmd', ['1',
+                                 '+1',
+                                 '-1',
+                                 '$',
+                                 '$-1',
+                                 '/foo/',
+                                 '/foo\/bar/',
+                                 '/foo\/bar/-3,/baz/+2d',
+                                 '/foo/+',
+                                 '/foo/+1',
+                                 '/foo/++',
+                                 '/foo/---',
+                                 '3a',
+                                 'e test',
+                                 'E test.txt',
+                                 'f test.txt',
+                                 'h',
+                                 'H',
+                                 'P',
+                                 'q',
+                                 'Q',
+                                 'u',
+                                 '/a/,/b/s/c/d/n',
+                                 'w file.txt',
+                                 'W file.txt',
+                                 'r file.txt',
+                                 'r !date',
+                                 ])
+def test_parse_cmd(cmd):
+    assert Buffer().parse_cmd(cmd)
 
+@pytest.mark.parametrize('cmd', [(',g/re/p'),
+                                 (',G/re/'),
+                                 (',v/re/p'),
+                                 (',V/re/'),
+                                 (',z1'),
+                                 ('!ls'),
+                                 ('1,2#comment'),
+                                 ])
+def test_parse_cmd_fails(cmd):
+    assert not Buffer().parse_cmd(cmd)
