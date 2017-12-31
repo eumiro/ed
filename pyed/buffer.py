@@ -12,6 +12,7 @@ class Buffer:
         else:
             self.lines = [str(line) for line in lines]
         self.cur = len(self.lines)
+        self.marks = {}
         self.re_cmd = self._init_re_cmd()
 
     def _init_re_cmd(self):
@@ -28,7 +29,8 @@ class Buffer:
         suff = r'[-+]*\d*'
         sep = r',|;|'
         re_cmd = re.compile(rf"""^
-            ((?P<_0>{addr})(?P<_1>{suff})
+            ((?P<b_0>{addr})(?P<b_1>{suff})
+             (?P<b>)
              |
              (?P<a_0>{addr})(?P<a_1>{suff})
              (?P<a>a|i|k[a-z]|s[gpr]*|x|=)
@@ -63,80 +65,84 @@ class Buffer:
     def __len__(self):
         return len(('\n'.join(self.lines)).encode('utf8'))
 
-    def find_pos(self, raw_pos):
-        raw_lower, comma, raw_upper = raw_pos.partition(',')
-
-        if comma:
-            if raw_lower.isdigit():
-                lower = int(raw_lower)
-            elif raw_lower == '':
-                lower = 1
+    def find_addr(self, addr, suff):
+        pos = None
+        if not addr:
+            pass
+        elif addr == '.':
+            pos = self.cur
+        elif addr == '$':
+            pos = len(self.lines)
+        elif addr[0].isdigit():
+            pos = int(addr)
+        elif addr.startswith(('-', '+')):
+            if addr.endswith('-'):
+                pos = self.cur - len(addr)
+            elif addr.endswith('+'):
+                pos = self.cur + len(addr)
             else:
-                raise NotImplementedError(f'invalid lower pos {raw_lower!r}')
-
-            if raw_upper.isdigit():
-                upper = int(raw_upper)
-                self.cur = upper
-            elif raw_upper == '':
-                upper = len(self.lines)
+                pos = self.cur + int(addr)
+        elif addr.startswith("'"):
+            pos = self.marks[addr[1]]
+        elif addr.startswith('/'):
+            for i in range(len(self.lines)):
+                if addr[1:-1] in self.lines[(self.cur + i) % len(self.lines)]:
+                    pos = (self.cur + i) % len(self.lines)
+                    break
             else:
-                raise NotImplementedError(f'invalid upper pos {raw_upper!r}')
+                raise ValueError()
+        elif addr.startswith('?'):
+            for i in range(len(self.lines)):
+                if addr[1:-1] in self.lines[(self.cur - i) % len(self.lines)]:
+                    pos = (self.cur - i) % len(self.lines)
+                    break
+            else:
+                raise ValueError()
         else:
-            if raw_lower.isdigit():
-                lower = int(raw_lower)
-                upper = lower
-            elif raw_lower == '':
-                lower = self.cur
-                upper = self.cur + 1
-            else:
-                raise NotImplementedError(f'invalid lower pos {raw_lower!r}')
+            raise ValueError()
 
-        return slice(lower - 1, upper)
+        if suff:
+            if suff.endswith('-'):
+                pos -= len(suff)
+            elif suff.endswith('+'):
+                pos += len(suff)
+            else:
+                pos += int(suff)
+        return pos
 
     def run(self, cmd):
-        if cmd.endswith('p'):
-            rng = self.find_pos(cmd[:-1])
-            if self.cur:
-                return self.lines[rng]
+        act = self.parse_cmd(cmd)
+        if act['action'] == 'p':
+            line0 = self.find_addr(act['addr0'], act['suff0'])
+            line1 = self.find_addr(act['addr1'], act['suff1'])
+            if act['sep']:
+                if line0 is None:
+                    line0 = 1
+                if line1 is None:
+                    line1 = len(self.lines)
+                    return self.lines[line0-1:line1]
             else:
-                return []
-        else:
-            raise NotImplementedError(f'invalid command {cmd}')
-
-    @staticmethod
-    def match_address(cmd, default):
-        first, second = None, None
-        if cmd.startswith('/'):
-            match = re.match(r'^/((\\\/|[^/])*)/(.*)$', cmd)
-            first = re.compile(match.group(1).replace('\/', '/'))
-            second = 0
-            cmd = match.group(3)
-            if cmd.startswith(tuple('-+0123456789')):
-                if len(cmd) > 1 and cmd[1].isdigit():
-                    match = re.match(r'^([-+]\d+)(.*)$', cmd)
-                    second = int(match.group(1))
-                    cmd = match.group(2)
+                if line0:
+                    return self.lines[line0-1:line0]
                 else:
-                    match = re.match(r'^([-+]+)(.*)$', cmd)
-                    second = len(match.group(1))
-                    if cmd.startswith('-'):
-                        second = -second
-                    cmd = match.group(2)
-        elif cmd.startswith(tuple('0123456789')):
-            match = re.match(r'^(\d+)(.*)$', cmd)
-            first, second = 0, int(match.group(1))
-            cmd = match.group(2)
-        elif cmd.startswith(('-', '+')):
-            match = re.match(r'^([-+]\d+)(.*)$', cmd)
-            first, second = None, int(match.group(1))
-            cmd = match.group(2)
-        elif cmd.startswith('$'):
-            first, second = 0, -1
-            cmd = cmd[1:]
-        else:
-            first, second = default
-        return (first, second), cmd
+                    return self.lines[self.cur-1:self.cur]
+            return self.lines[line0-1:line1]
+
+
 
     def parse_cmd(self, cmd):
         match = self.re_cmd.match(cmd)
-        return bool(match)
+        if match:
+            act = {k:v for k,v in match.groupdict().items() if v is not None}
+            sect, verb = min(act.items())
+            if sect == 'c':
+                return {'action': verb,
+                        'addr0': act['c_0'],
+                        'suff0': act['c_1'],
+                        'sep': act['c_2'],
+                        'addr1': act['c_3'],
+                        'suff1': act['c_4']}
+            else:
+                return True
+        else:
+            return False
