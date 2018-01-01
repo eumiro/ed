@@ -36,7 +36,14 @@ def buffer_five():
                           ('4,p', ['four', 'five']),
                           ('4,$p', ['four', 'five']),
                           ('1,3p', ['one', 'two', 'three']),
-                          (',p', ['one', 'two', 'three', 'four', 'five'])])
+                          (',p', ['one', 'two', 'three', 'four', 'five']),
+                          ('n', ['5\tfive']),
+                          ('1n', ['1\tone']),
+                          (',2n', ['1\tone', '2\ttwo']),
+                          ('4,n', ['4\tfour', '5\tfive']),
+                          ('4,$n', ['4\tfour', '5\tfive']),
+                          ('1,3n', ['1\tone', '2\ttwo', '3\tthree']),
+                          (',n', ['1\tone', '2\ttwo', '3\tthree', '4\tfour', '5\tfive'])])
 def test_five_cmd(cmd, res, buffer_five):
     assert buffer_five.run(cmd) == res
 

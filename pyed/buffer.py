@@ -130,8 +130,10 @@ class Buffer:
             if act['action'] == 'p':
                 return self.lines[output]
             elif act['action'] == 'l':
-                return [line.replace('$', '\\$') + '$'
-                        for line in self.lines[output]]
+                return [line.replace('$', '\\$') + '$' for line in self.lines[output]]
+            elif act['action'] == 'n':
+                return [f'{i+1}\t{self.lines[i]}'
+                        for i in range(*output.indices(len(self.lines)))]
 
 
     def parse_cmd(self, cmd):
