@@ -40,6 +40,22 @@ def test_five_cmd(cmd, res, buffer_five):
     assert buffer_five.run(cmd) == res
 
 
+@pytest.fixture(scope='function')
+def buffer_special():
+    return Buffer(['first $ line', '', '\\ third $'])
+
+
+@pytest.mark.parametrize('cmd, res',
+                         [('l', ['\\ third \\$$']),
+                          ('1l', ['first \\$ line$']),
+                          (',2l', ['first \\$ line$', '$']),
+                          ('2,l', ['$', '\\ third \\$$']),
+                          ('1,3l', ['first \\$ line$', '$', '\\ third \\$$']),
+                          (',l', ['first \\$ line$', '$', '\\ third \\$$'])])
+def test_special_(cmd, res, buffer_special):
+    assert buffer_special.run(cmd) == res
+
+
 @pytest.mark.parametrize('cmd', ['1',
                                  '+1',
                                  '-1',

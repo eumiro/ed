@@ -112,22 +112,27 @@ class Buffer:
 
     def run(self, cmd):
         act = self.parse_cmd(cmd)
-        if act['action'] == 'p':
+        if act['sect'] == 'c':
             line0 = self.find_addr(act['addr0'], act['suff0'])
             line1 = self.find_addr(act['addr1'], act['suff1'])
+            output = None
             if act['sep']:
                 if line0 is None:
                     line0 = 1
                 if line1 is None:
                     line1 = len(self.lines)
-                    return self.lines[line0-1:line1]
+                    output = self.lines[line0-1:line1]
             else:
                 if line0:
-                    return self.lines[line0-1:line0]
+                    output = self.lines[line0-1:line0]
                 else:
-                    return self.lines[self.cur-1:self.cur]
-            return self.lines[line0-1:line1]
-
+                    output = self.lines[self.cur-1:self.cur]
+            if output is None:
+                output = self.lines[line0-1:line1]
+            if act['action'] == 'p':
+                return output
+            elif act['action'] == 'l':
+                return [line.replace('$', '\\$') + '$' for line in output]
 
 
     def parse_cmd(self, cmd):
@@ -136,7 +141,8 @@ class Buffer:
             act = {k:v for k,v in match.groupdict().items() if v is not None}
             sect, verb = min(act.items())
             if sect == 'c':
-                return {'action': verb,
+                return {'sect': 'c',
+                        'action': verb,
                         'addr0': act['c_0'],
                         'suff0': act['c_1'],
                         'sep': act['c_2'],
