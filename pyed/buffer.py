@@ -11,7 +11,7 @@ class Buffer:
             self.lines = []
         else:
             self.lines = [str(line) for line in lines]
-        self.cur = len(self.lines)
+        self.cur = len(self.lines) - 1
         self.marks = {}
         self.re_cmd = self._init_re_cmd()
 
@@ -66,15 +66,14 @@ class Buffer:
         return len(('\n'.join(self.lines)).encode('utf8'))
 
     def find_addr(self, addr, suff):
-        pos = None
         if not addr:
-            pass
+            pos = None
         elif addr == '.':
             pos = self.cur
         elif addr == '$':
-            pos = len(self.lines)
+            pos = len(self.lines) - 1
         elif addr[0].isdigit():
-            pos = int(addr)
+            pos = int(addr) - 1
         elif addr.startswith(('-', '+')):
             if addr.endswith('-'):
                 pos = self.cur - len(addr)
@@ -108,37 +107,39 @@ class Buffer:
                 pos += len(suff)
             else:
                 pos += int(suff)
+        if pos is not None:
+            assert 0 <= pos < len(self.lines)
         return pos
 
     def run(self, cmd):
         act = self.parse_cmd(cmd)
         if act['sect'] == 'c':
-            line0 = self.find_addr(act['addr0'], act['suff0'])
-            line1 = self.find_addr(act['addr1'], act['suff1'])
-            output = None
+            pos0 = self.find_addr(act['addr0'], act['suff0'])
+            pos1 = self.find_addr(act['addr1'], act['suff1'])
+            if pos1 is None:
+                pos1 = len(self.lines) - 1
+            if None not in (pos0, pos1):
+                assert pos0 <= pos1
             if act['sep']:
-                if line0 is None:
-                    line0 = 1
-                if line1 is None:
-                    line1 = len(self.lines)
-                    output = self.lines[line0-1:line1]
+                output = slice(pos0, pos1 + 1)
+                self.cur = pos1
+            elif pos0 is None:
+                output = slice(self.cur, self.cur + 1)
             else:
-                if line0:
-                    output = self.lines[line0-1:line0]
-                else:
-                    output = self.lines[self.cur-1:self.cur]
-            if output is None:
-                output = self.lines[line0-1:line1]
+                output = slice(pos0, pos0 + 1)
             if act['action'] == 'p':
-                return output
+                return self.lines[output]
             elif act['action'] == 'l':
-                return [line.replace('$', '\\$') + '$' for line in output]
+                return [line.replace('$', '\\$') + '$'
+                        for line in self.lines[output]]
 
 
     def parse_cmd(self, cmd):
         match = self.re_cmd.match(cmd)
         if match:
-            act = {k:v for k,v in match.groupdict().items() if v is not None}
+            act = {k: v
+                   for k, v in match.groupdict().items()
+                   if v is not None}
             sect, verb = min(act.items())
             if sect == 'c':
                 return {'sect': 'c',

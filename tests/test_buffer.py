@@ -34,6 +34,7 @@ def buffer_five():
                           ('1p', ['one']),
                           (',2p', ['one', 'two']),
                           ('4,p', ['four', 'five']),
+                          ('4,$p', ['four', 'five']),
                           ('1,3p', ['one', 'two', 'three']),
                           (',p', ['one', 'two', 'three', 'four', 'five'])])
 def test_five_cmd(cmd, res, buffer_five):
@@ -50,6 +51,7 @@ def buffer_special():
                           ('1l', ['first \\$ line$']),
                           (',2l', ['first \\$ line$', '$']),
                           ('2,l', ['$', '\\ third \\$$']),
+                          ('2,$l', ['$', '\\ third \\$$']),
                           ('1,3l', ['first \\$ line$', '$', '\\ third \\$$']),
                           (',l', ['first \\$ line$', '$', '\\ third \\$$'])])
 def test_special_(cmd, res, buffer_special):
