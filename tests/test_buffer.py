@@ -106,3 +106,11 @@ def test_parse_cmd(cmd):
                                  ])
 def test_parse_cmd_fails(cmd):
     assert not Buffer().parse_cmd(cmd)
+
+
+def test_set_mark(buffer_five):
+    buffer_five.run('2ka')
+    buffer_five.run('kb')
+    assert buffer_five.run('\'ap') == ['two']
+    assert buffer_five.run('\'bp') == ['five']
+    assert buffer_five.run('\'a+,\'b-1p') == ['three', 'four']

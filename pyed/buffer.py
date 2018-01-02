@@ -113,7 +113,13 @@ class Buffer:
 
     def run(self, cmd):
         act = self.parse_cmd(cmd)
-        if act['sect'] == 'c':
+        if act['sect'] == 'a':
+            pos0 = self.find_addr(act['addr0'], act['suff0'])
+            if pos0 is None:
+                pos0 = self.cur
+            if act['action'].startswith('k'):
+                self.marks[act['action'][1]] = pos0
+        elif act['sect'] == 'c':
             pos0 = self.find_addr(act['addr0'], act['suff0'])
             pos1 = self.find_addr(act['addr1'], act['suff1'])
             if pos1 is None:
@@ -143,7 +149,12 @@ class Buffer:
                    for k, v in match.groupdict().items()
                    if v is not None}
             sect, verb = min(act.items())
-            if sect == 'c':
+            if sect == 'a':
+                return {'sect': 'a',
+                        'action': verb,
+                        'addr0': act['a_0'],
+                        'suff0': act['a_1']}
+            elif sect == 'c':
                 return {'sect': 'c',
                         'action': verb,
                         'addr0': act['c_0'],
