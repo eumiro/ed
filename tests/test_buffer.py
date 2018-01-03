@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import re
-
 import pytest
 
 from pyed.buffer import Buffer
@@ -23,7 +21,6 @@ def test_init_ok_len(lines, size):
     assert len(Buffer(lines)) == size
 
 
-
 @pytest.fixture(scope='function')
 def buffer_five():
     return Buffer(['one', 'two', 'three', 'four', 'five'])
@@ -43,7 +40,8 @@ def buffer_five():
                           ('4,n', ['4\tfour', '5\tfive']),
                           ('4,$n', ['4\tfour', '5\tfive']),
                           ('1,3n', ['1\tone', '2\ttwo', '3\tthree']),
-                          (',n', ['1\tone', '2\ttwo', '3\tthree', '4\tfour', '5\tfive'])])
+                          (',n', ['1\tone', '2\ttwo', '3\tthree',
+                                  '4\tfour', '5\tfive'])])
 def test_five_cmd(cmd, res, buffer_five):
     assert buffer_five.run(cmd) == res
 
@@ -65,36 +63,37 @@ def test_special_(cmd, res, buffer_special):
     assert buffer_special.run(cmd) == res
 
 
-@pytest.mark.parametrize('cmd', ['1',
-                                 '+1',
-                                 '-1',
-                                 '$',
-                                 '$-1',
-                                 '/foo/',
-                                 '/foo\/bar/',
-                                 '/foo\/bar/-3,/baz/+2d',
-                                 '/foo/+',
-                                 '/foo/+1',
-                                 '/foo/++',
-                                 '/foo/---',
-                                 '3a',
-                                 'e test',
-                                 'E test.txt',
-                                 'f test.txt',
-                                 'h',
-                                 'H',
-                                 'P',
-                                 'q',
-                                 'Q',
-                                 'u',
-                                 '/a/,/b/s/c/d/n',
-                                 'w file.txt',
-                                 'W file.txt',
-                                 'r file.txt',
-                                 'r !date',
-                                 ])
+@pytest.mark.parametrize('cmd', [r'1',
+                                 r'+1',
+                                 r'-1',
+                                 r'$',
+                                 r'$-1',
+                                 r'/foo/',
+                                 r'/foo\/bar/',
+                                 r'/foo\/bar/-3,/baz/+2d',
+                                 r'/foo/+',
+                                 r'/foo/+1',
+                                 r'/foo/++',
+                                 r'/foo/---',
+                                 r'3a',
+                                 r'e test',
+                                 r'E test.txt',
+                                 r'f test.txt',
+                                 r'h',
+                                 r'H',
+                                 r'P',
+                                 r'q',
+                                 r'Q',
+                                 r'u',
+                                 r'/a/,/b/s/c/d/n',
+                                 r'w file.txt',
+                                 r'W file.txt',
+                                 r'r file.txt',
+                                 r'r !date',
+                                ])
 def test_parse_cmd(cmd):
     assert Buffer().parse_cmd(cmd)
+
 
 @pytest.mark.parametrize('cmd', [(',g/re/p'),
                                  (',G/re/'),
@@ -103,7 +102,7 @@ def test_parse_cmd(cmd):
                                  (',z1'),
                                  ('!ls'),
                                  ('1,2#comment'),
-                                 ])
+                                ])
 def test_parse_cmd_fails(cmd):
     assert not Buffer().parse_cmd(cmd)
 

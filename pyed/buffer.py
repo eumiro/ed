@@ -13,9 +13,10 @@ class Buffer:
             self.lines = [str(line) for line in lines]
         self.cur = len(self.lines) - 1
         self.marks = {}
-        self.re_cmd = self._init_re_cmd()
+        self.re_cmd = Buffer._init_re_cmd()
 
-    def _init_re_cmd(self):
+    @staticmethod
+    def _init_re_cmd():
         addr = r"""
                 \.|
                 \$|
@@ -107,12 +108,14 @@ class Buffer:
                 pos += len(suff)
             else:
                 pos += int(suff)
+
         if pos is not None:
             assert 0 <= pos < len(self.lines)
         return pos
 
     def run(self, cmd):
         act = self.parse_cmd(cmd)
+        res = []
         if act['sect'] == 'a':
             pos0 = self.find_addr(act['addr0'], act['suff0'])
             if pos0 is None:
@@ -134,13 +137,14 @@ class Buffer:
             else:
                 output = slice(pos0, pos0 + 1)
             if act['action'] == 'p':
-                return self.lines[output]
+                res = self.lines[output]
             elif act['action'] == 'l':
-                return [line.replace('$', '\\$') + '$' for line in self.lines[output]]
+                res = [line.replace('$', '\\$') + '$'
+                       for line in self.lines[output]]
             elif act['action'] == 'n':
-                return [f'{i+1}\t{self.lines[i]}'
-                        for i in range(*output.indices(len(self.lines)))]
-
+                res = [f'{i+1}\t{self.lines[i]}'
+                       for i in range(*output.indices(len(self.lines)))]
+        return res
 
     def parse_cmd(self, cmd):
         match = self.re_cmd.match(cmd)
@@ -150,19 +154,20 @@ class Buffer:
                    if v is not None}
             sect, verb = min(act.items())
             if sect == 'a':
-                return {'sect': 'a',
-                        'action': verb,
-                        'addr0': act['a_0'],
-                        'suff0': act['a_1']}
+                res = {'sect': 'a',
+                       'action': verb,
+                       'addr0': act['a_0'],
+                       'suff0': act['a_1']}
             elif sect == 'c':
-                return {'sect': 'c',
-                        'action': verb,
-                        'addr0': act['c_0'],
-                        'suff0': act['c_1'],
-                        'sep': act['c_2'],
-                        'addr1': act['c_3'],
-                        'suff1': act['c_4']}
+                res = {'sect': 'c',
+                       'action': verb,
+                       'addr0': act['c_0'],
+                       'suff0': act['c_1'],
+                       'sep': act['c_2'],
+                       'addr1': act['c_3'],
+                       'suff1': act['c_4']}
             else:
-                return True
+                res = True
         else:
-            return False
+            res = False
+        return res
