@@ -113,7 +113,13 @@ class Buffer:
             assert 0 <= pos < len(self.lines)
         return pos
 
-    def run(self, cmd):
+    def run(self, cmd, lines=None):
+        if lines is None:
+            lines = []
+        assert isinstance(lines, list)
+        if lines and lines[-1] == '.':
+            lines.pop(-1)
+
         act = self.parse_cmd(cmd)
         res = []
         if act['sect'] == 'a':
@@ -122,6 +128,11 @@ class Buffer:
                 pos0 = self.cur
             if act['action'].startswith('k'):
                 self.marks[act['action'][1]] = pos0
+            elif act['action'] == 'a':
+                self.lines[pos0+1:pos0+1] = lines
+            elif act['action'] == 'i':
+                self.lines[pos0:pos0] = lines
+
         elif act['sect'] == 'c':
             pos0 = self.find_addr(act['addr0'], act['suff0'])
             pos1 = self.find_addr(act['addr1'], act['suff1'])

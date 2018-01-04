@@ -22,6 +22,11 @@ def test_init_ok_len(lines, size):
 
 
 @pytest.fixture(scope='function')
+def buffer_two():
+    return Buffer(['one', 'two'])
+
+
+@pytest.fixture(scope='function')
 def buffer_five():
     return Buffer(['one', 'two', 'three', 'four', 'five'])
 
@@ -113,3 +118,19 @@ def test_set_mark(buffer_five):
     assert buffer_five.run('\'ap') == ['two']
     assert buffer_five.run('\'bp') == ['five']
     assert buffer_five.run('\'a+,\'b-1p') == ['three', 'four']
+
+
+@pytest.mark.parametrize('cmd, lines, res',
+                         [('a', ['x'], ['one', 'two', 'x']),
+                          ('1a', ['x'], ['one', 'x', 'two']),
+                          ('/tw/a', ['x'], ['one', 'two', 'x']),
+                          ('$a', ['x', 'y'], ['one', 'two', 'x', 'y']),
+                          ('i', ['x'], ['one', 'x', 'two']),
+                          ('1i', ['x'], ['x', 'one', 'two']),
+                          ('/tw/i', ['x'], ['one', 'x', 'two']),
+                          ('$i', ['x', 'y'], ['one', 'x', 'y', 'two']),
+                          ])
+def test_append(cmd, lines, res, buffer_two):
+    buffer_two.run(cmd, lines)
+    assert buffer_two.run(',p') == res
+
