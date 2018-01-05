@@ -129,6 +129,11 @@ def test_set_mark(buffer_five):
                           ('1i', ['x'], ['x', 'one', 'two']),
                           ('/tw/i', ['x'], ['one', 'x', 'two']),
                           ('$i', ['x', 'y'], ['one', 'x', 'y', 'two']),
+                          ('d', [], ['one']),
+                          ('1d', [], ['two']),
+                          ('/tw/d', [], ['one']),
+                          ('/on/,/tw/d', [], []),
+                          (',d', [], []),
                           ])
 def test_append(cmd, lines, res, buffer_two):
     buffer_two.run(cmd, lines)

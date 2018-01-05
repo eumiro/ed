@@ -155,6 +155,8 @@ class Buffer:
             elif act['action'] == 'n':
                 res = [f'{i+1}\t{self.lines[i]}'
                        for i in range(*output.indices(len(self.lines)))]
+            elif act['action'] == 'd':
+                self.lines[output] = []
         return res
 
     def parse_cmd(self, cmd):
