@@ -139,3 +139,12 @@ def test_append(cmd, lines, res, buffer_two):
     buffer_two.run(cmd, lines)
     assert buffer_two.run(',p') == res
 
+
+@pytest.mark.parametrize('cmd, res', [
+                          (',j', ['onetwothreefourfive']),
+                          ('1,3j', ['onetwothree', 'four', 'five']),
+                          ('j', ['one', 'two', 'three', 'four', 'five']),
+                          ])
+def test_join(cmd, res, buffer_five):
+    buffer_five.run(cmd)
+    assert buffer_five.run(',p') == res

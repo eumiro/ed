@@ -157,6 +157,8 @@ class Buffer:
                        for i in range(*output.indices(len(self.lines)))]
             elif act['action'] == 'd':
                 self.lines[output] = []
+            elif act['action'] == 'j':
+                self.lines[output] = [''.join(self.lines[output])]
         return res
 
     def parse_cmd(self, cmd):
