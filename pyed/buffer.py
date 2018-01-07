@@ -13,6 +13,7 @@ class Buffer:
             self.lines = [str(line) for line in lines]
         self.cur = len(self.lines) - 1
         self.marks = {}
+        self.cut_buffer = []
         self.re_cmd = Buffer._init_re_cmd()
 
     @staticmethod
@@ -132,6 +133,8 @@ class Buffer:
                 self.lines[pos0+1:pos0+1] = lines
             elif act['action'] == 'i':
                 self.lines[pos0:pos0] = lines
+            elif act['action'] == 'x':
+                self.lines[pos0+1:pos0+1] = self.cut_buffer
 
         elif act['sect'] == 'c':
             pos0 = self.find_addr(act['addr0'], act['suff0'])
@@ -155,9 +158,13 @@ class Buffer:
             elif act['action'] == 'n':
                 res = [f'{i+1}\t{self.lines[i]}'
                        for i in range(*output.indices(len(self.lines)))]
+            elif act['action'] == 'y':
+                self.cut_buffer = self.lines[output]
             elif act['action'] == 'd':
+                self.cut_buffer = self.lines[output]
                 self.lines[output] = []
             elif act['action'] == 'j':
+                self.cut_buffer = self.lines[output]
                 self.lines[output] = [''.join(self.lines[output])]
             elif act['action'] == 'c':
                 self.lines[output] = lines

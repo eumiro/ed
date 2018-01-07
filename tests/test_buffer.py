@@ -156,3 +156,14 @@ def test_append(cmd, lines, res, buffer_two):
 def test_join(cmd, res, buffer_five):
     buffer_five.run(cmd)
     assert buffer_five.run(',p') == res
+
+
+@pytest.mark.parametrize('cmd, res', [
+                          ('1,3d', ['four', 'five', 'one', 'two', 'three']),
+                          ('1,3y', ['one', 'two', 'three', 'four', 'five', 'one', 'two', 'three']),
+                          ('1,3j', ['onetwothree', 'four', 'five', 'one', 'two', 'three'])
+                         ])
+def test_cutbuffer(cmd, res, buffer_five):
+    buffer_five.run(cmd)
+    buffer_five.run('$x')
+    assert buffer_five.run(',p') == res
