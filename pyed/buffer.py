@@ -159,6 +159,8 @@ class Buffer:
                 self.lines[output] = []
             elif act['action'] == 'j':
                 self.lines[output] = [''.join(self.lines[output])]
+            elif act['action'] == 'c':
+                self.lines[output] = lines
         return res
 
     def parse_cmd(self, cmd):
