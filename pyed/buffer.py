@@ -74,6 +74,8 @@ class Buffer:
             pos = self.cur
         elif addr == '$':
             pos = len(self.lines) - 1
+        elif addr == '0':
+            pos = 0
         elif addr[0].isdigit():
             pos = int(addr) - 1
         elif addr.startswith(('-', '+')):
@@ -168,6 +170,33 @@ class Buffer:
                 self.lines[output] = [''.join(self.lines[output])]
             elif act['action'] == 'c':
                 self.lines[output] = lines
+        elif act['sect'] == 'm':
+            pos0 = self.find_addr(act['addr0'], act['suff0'])
+            pos1 = self.find_addr(act['addr1'], act['suff1'])
+            pos2 = self.find_addr(act['addr2'], act['suff2'])
+            if pos1 is None:
+                pos1 = len(self.lines) - 1
+            if None not in (pos0, pos1):
+                assert pos0 <= pos1
+            if act['sep']:
+                output = slice(pos0, pos1 + 1)
+                self.cur = pos1
+            elif pos0 is None:
+                output = slice(self.cur, self.cur + 1)
+            else:
+                output = slice(pos0, pos0 + 1)
+            if act['action'] == 'm':
+                if pos2 < output.start:
+                    tmp = self.lines[output]
+                    self.lines[output] = []
+                    self.lines[pos2+1:pos2+1] = tmp
+                elif pos2 == output.start:
+                    pass
+                elif pos2 >= output.stop:
+                    self.lines[pos2+1:pos2+1] = self.lines[output]
+                    self.lines[output] = []
+                else:
+                    raise ValueError()
         return res
 
     def parse_cmd(self, cmd):
@@ -190,6 +219,16 @@ class Buffer:
                        'sep': act['c_2'],
                        'addr1': act['c_3'],
                        'suff1': act['c_4']}
+            elif sect == 'm':
+                res = {'sect': 'm',
+                       'action': verb,
+                       'addr0': act['m_0'],
+                       'suff0': act['m_1'],
+                       'sep': act['m_2'],
+                       'addr1': act['m_3'],
+                       'suff1': act['m_4'],
+                       'addr2': act['m_5'],
+                       'suff2': act['m_6']}
             else:
                 res = True
         else:

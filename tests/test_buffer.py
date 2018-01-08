@@ -142,6 +142,9 @@ def test_set_mark(buffer_five):
                           ('1c', ['x', 'y'], ['x', 'y', 'two']),
                           (',c', [], []),
                           (',c', ['x'], ['x']),
+                          ('1m$', [], ['two', 'one']),
+                          ('1m1', [], ['one', 'two']),
+                          ('2m1', [], ['one', 'two']),
                           ])
 def test_append(cmd, lines, res, buffer_two):
     buffer_two.run(cmd, lines)
