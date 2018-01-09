@@ -197,6 +197,8 @@ class Buffer:
                     self.lines[output] = []
                 else:
                     raise ValueError()
+            elif act['action'] == 't':
+                self.lines[pos2+1:pos2+1] = self.lines[output]
         return res
 
     def parse_cmd(self, cmd):
