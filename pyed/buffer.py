@@ -137,6 +137,8 @@ class Buffer:
                 self.lines[pos0:pos0] = lines
             elif act['action'] == 'x':
                 self.lines[pos0+1:pos0+1] = self.cut_buffer
+            elif act['action'] == '=':
+                res = str(pos0)
 
         elif act['sect'] == 'c':
             pos0 = self.find_addr(act['addr0'], act['suff0'])
@@ -154,12 +156,15 @@ class Buffer:
                 output = slice(pos0, pos0 + 1)
             if act['action'] == 'p':
                 res = self.lines[output]
+                self.cur = output.stop
             elif act['action'] == 'l':
                 res = [line.replace('$', '\\$') + '$'
                        for line in self.lines[output]]
+                self.cur = output.stop
             elif act['action'] == 'n':
                 res = [f'{i+1}\t{self.lines[i]}'
                        for i in range(*output.indices(len(self.lines)))]
+                self.cur = output.stop
             elif act['action'] == 'y':
                 self.cut_buffer = self.lines[output]
             elif act['action'] == 'd':

@@ -173,3 +173,13 @@ def test_cutbuffer(cmd, res, buffer_five):
     buffer_five.run(cmd)
     buffer_five.run('$x')
     assert buffer_five.run(',p') == res
+
+
+@pytest.mark.parametrize('cmd, res', [
+                          ('1p', '1'),
+                          ('/t/l', '2'),
+                          ('$--n', '3'),
+                        ])
+def test_curline(cmd, res, buffer_five):
+    buffer_five.run(cmd)
+    assert buffer_five.run('.=') == res
