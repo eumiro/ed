@@ -39,26 +39,26 @@ class Buffer:
              (?P<c_0>{addr})(?P<c_1>{suff})
              (?P<c_2>{sep})
              (?P<c_3>{addr})(?P<c_4>{suff})
-             (?P<c>c|d|j|l|n|p|y)
+             (?P<c>[cdjlnpy])
              |
-             (?P<e>[eEf])\s+(?P<e_0>[\w\.]+)
+             (?P<e>[eEf])\s+(?P<e_0>[\w.]+)
              |
-             (?P<h>h|H|P|q|Q|u)
+             (?P<h>[hHPqQu])
              |
              (?P<m_0>{addr})(?P<m_1>{suff})
              (?P<m_2>{sep})
              (?P<m_3>{addr})(?P<m_4>{suff})
-             (?P<m>m|t)
+             (?P<m>[mt])
              (?P<m_5>{addr})(?P<m_6>{suff})
              |
              (?P<r_0>{addr})(?P<r_1>{suff})
-             (?P<r>r|w|wq|W)\s+(?P<r_2>!?[\w\.]+)
+             (?P<r>r|w|wq|W)\s+(?P<r_2>!?[\w.]+)
              |
              (?P<s_0>{addr})(?P<s_1>{suff})
              (?P<s_2>{sep})
              (?P<s_3>{addr})(?P<s_4>{suff})
              (?P<s>s)
-             /(?P<s_5>(\\\/|[^/])*)/(?P<s_6>(\\\/|[^/])*)/
+             /(?P<s_5>(\\/|[^/])*)/(?P<s_6>(\\/|[^/])*)/
              (?P<s_7>[g\dlnp]*)
             )$""", re.X)
         return re_cmd
@@ -112,13 +112,15 @@ class Buffer:
                 pos += int(suff)
 
         if pos is not None:
-            assert 0 <= pos < len(self.lines)
+            if not 0 <= pos < len(self.lines):
+                raise ValueError()
         return pos
 
     def run(self, cmd, lines=None):
         if lines is None:
             lines = []
-        assert isinstance(lines, list)
+        elif not isinstance(lines, list):
+            raise ValueError()
         if lines and lines[-1] == '.':
             lines.pop(-1)
 
@@ -145,7 +147,8 @@ class Buffer:
             if pos1 is None:
                 pos1 = len(self.lines) - 1
             if None not in (pos0, pos1):
-                assert pos0 <= pos1
+                if pos1 < pos0:
+                    raise ValueError()
             if act['sep']:
                 output = slice(pos0, pos1 + 1)
                 self.cur = pos1
@@ -181,7 +184,8 @@ class Buffer:
             if pos1 is None:
                 pos1 = len(self.lines) - 1
             if None not in (pos0, pos1):
-                assert pos0 <= pos1
+                if pos1 < pos0:
+                    raise ValueError()
             if act['sep']:
                 output = slice(pos0, pos1 + 1)
                 self.cur = pos1

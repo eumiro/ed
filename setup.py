@@ -6,7 +6,9 @@ from pathlib import Path
 from setuptools import setup, find_packages
 
 NAME = "pyed"
-KEYWORDS = ["ed", "editor", "text editor", "unix", "ed(1)", "the standard text editor"]
+KEYWORDS = [
+    "ed", "editor", "text editor", "unix", "ed(1)", "the standard text editor"
+]
 CLASSIFIERS = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",

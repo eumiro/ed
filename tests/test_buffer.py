@@ -94,19 +94,19 @@ def test_special_(cmd, res, buffer_special):
                                  r'W file.txt',
                                  r'r file.txt',
                                  r'r !date',
-                                ])
+                                 ])
 def test_parse_cmd(cmd):
     assert Buffer().parse_cmd(cmd)
 
 
-@pytest.mark.parametrize('cmd', [(',g/re/p'),
-                                 (',G/re/'),
-                                 (',v/re/p'),
-                                 (',V/re/'),
-                                 (',z1'),
-                                 ('!ls'),
-                                 ('1,2#comment'),
-                                ])
+@pytest.mark.parametrize('cmd', [',g/re/p',
+                                 ',G/re/',
+                                 ',v/re/p',
+                                 ',V/re/',
+                                 ',z1',
+                                 '!ls',
+                                 '1,2#comment',
+                                 ])
 def test_parse_cmd_fails(cmd):
     assert not Buffer().parse_cmd(cmd)
 
@@ -154,20 +154,20 @@ def test_append(cmd, lines, res, buffer_two):
 
 
 @pytest.mark.parametrize('cmd, res', [
-                          (',j', ['onetwothreefourfive']),
-                          ('1,3j', ['onetwothree', 'four', 'five']),
-                          ('j', ['one', 'two', 'three', 'four', 'five']),
-                          ])
+    (',j', ['onetwothreefourfive']),
+    ('1,3j', ['onetwothree', 'four', 'five']),
+    ('j', ['one', 'two', 'three', 'four', 'five']),
+])
 def test_join(cmd, res, buffer_five):
     buffer_five.run(cmd)
     assert buffer_five.run(',p') == res
 
 
 @pytest.mark.parametrize('cmd, res', [
-                          ('1,3d', ['four', 'five', 'one', 'two', 'three']),
-                          ('1,3y', ['one', 'two', 'three', 'four', 'five', 'one', 'two', 'three']),
-                          ('1,3j', ['onetwothree', 'four', 'five', 'one', 'two', 'three'])
-                         ])
+    ('1,3d', ['four', 'five', 'one', 'two', 'three']),
+    ('1,3y', ['one', 'two', 'three', 'four', 'five', 'one', 'two', 'three']),
+    ('1,3j', ['onetwothree', 'four', 'five', 'one', 'two', 'three'])
+])
 def test_cutbuffer(cmd, res, buffer_five):
     buffer_five.run(cmd)
     buffer_five.run('$x')
@@ -175,10 +175,10 @@ def test_cutbuffer(cmd, res, buffer_five):
 
 
 @pytest.mark.parametrize('cmd, res', [
-                          ('1p', '1'),
-                          ('/t/l', '2'),
-                          ('$--n', '3'),
-                        ])
+    ('1p', '1'),
+    ('/t/l', '2'),
+    ('$--n', '3'),
+])
 def test_curline(cmd, res, buffer_five):
     buffer_five.run(cmd)
     assert buffer_five.run('.=') == res
