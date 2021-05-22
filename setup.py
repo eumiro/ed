@@ -1,12 +1,12 @@
 """
-pyed setup.py
+ed setup.py
 """
 import re
 from pathlib import Path
 
 from setuptools import find_packages, setup
 
-NAME = "pyed"
+NAME = "ed"
 KEYWORDS = [
     "ed",
     "editor",
