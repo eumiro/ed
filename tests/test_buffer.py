@@ -1,6 +1,6 @@
 import pytest
 
-from pyed.buffer import Buffer
+from ed.buffer import Buffer
 
 
 def test_init_invalid():
